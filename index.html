@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5-Tage-Challenge Buch App</title>
+  <script src="https://cdn.jsdelivr.net/npm/docx@9.5.0/build/index.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+  <style>
+    :root {
+      --brand-gold: #B5742A;
+      --brand-gold-light: #E8C98A;
+      --brand-dark: #1A1410;
+      --brand-darker: #090806;
+      --text-default: #2A2018;
+      --text-muted: #7A6A58;
+      --box-bg: #FDF8F3;
+      --separator: #D4C4B0;
+      --surface: #0F0D0A;
+      --surface-card: #1A1612;
+      --surface-input: #231F1A;
+      --border: #3A3228;
+      --white: #FAF7F2;
+      --danger: #C0392B;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--brand-darker);
+      color: var(--white);
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 2px solid var(--brand-gold);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    header .plus {
+      font-size: 2.5rem;
+      color: var(--brand-gold-light);
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+
+    header h1 span {
+      color: var(--brand-gold);
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .section {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--brand-gold);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title::before {
+      content: '+';
+      color: var(--brand-gold-light);
+      font-size: 1.2rem;
+      font-weight: 300;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+      margin-top: 0.75rem;
+    }
+
+    label:first-of-type { margin-top: 0; }
+
+    input[type="text"], input[type="password"], textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--white);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--brand-gold);
+    }
+
+    textarea { resize: vertical; min-height: 120px; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.4rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--brand-gold);
+      color: var(--white);
+    }
+
+    .btn-primary:hover { background: #C9843A; }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--surface-input);
+      color: var(--white);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { border-color: var(--brand-gold); }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      padding: 0.4rem 0.7rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-danger:hover { background: rgba(192, 57, 43, 0.15); }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 1rem;
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--brand-gold);
+      background: rgba(181, 116, 42, 0.05);
+    }
+
+    .drop-zone p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .drop-zone .icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--brand-gold-light);
+    }
+
+    .drop-zone input[type="file"] { display: none; }
+
+    /* Chapter Cards */
+    .chapter-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .chapter-card {
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      cursor: grab;
+      transition: border-color 0.2s;
+    }
+
+    .chapter-card:active { cursor: grabbing; }
+    .chapter-card.dragging { opacity: 0.5; border-color: var(--brand-gold); }
+
+    .chapter-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .chapter-number {
+      background: var(--brand-gold);
+      color: var(--white);
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .chapter-title-input {
+      flex: 1;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--white);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      font-family: inherit;
+    }
+
+    .chapter-title-input:focus {
+      outline: none;
+      border-color: var(--brand-gold);
+      background: var(--surface);
+    }
+
+    .chapter-preview {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      max-height: 3.5em;
+      overflow: hidden;
+      margin-left: 40px;
+    }
+
+    .chapter-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.5rem;
+      margin-left: 40px;
+    }
+
+    .chapter-meta span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .chapter-status {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .status-pending { background: var(--surface); color: var(--text-muted); }
+    .status-processing { background: rgba(181, 116, 42, 0.2); color: var(--brand-gold-light); }
+    .status-done { background: rgba(39, 174, 96, 0.2); color: #27AE60; }
+    .status-error { background: rgba(192, 57, 43, 0.2); color: var(--danger); }
+
+    /* Add Text Area */
+    .add-text-section {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .add-text-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .add-text-row textarea {
+      flex: 1;
+      min-height: 80px;
+    }
+
+    /* Progress */
+    .progress-bar-container {
+      background: var(--surface);
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand-gold), var(--brand-gold-light));
+      border-radius: 999px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    .progress-text {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Generated Content Preview */
+    .preview-toggle {
+      background: none;
+      border: none;
+      color: var(--brand-gold);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .preview-content {
+      display: none;
+      margin-top: 0.75rem;
+      margin-left: 40px;
+      padding: 0.75rem;
+      background: var(--surface);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: var(--white);
+      line-height: 1.5;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .preview-content.open { display: block; }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      padding: 0.85rem 1.2rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+      max-width: 400px;
+    }
+
+    .toast-error { background: var(--danger); color: var(--white); }
+    .toast-success { background: #27AE60; color: var(--white); }
+
+    @keyframes slideIn {
+      from { transform: translateY(1rem); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .row { grid-template-columns: 1fr; }
+      header { padding: 1rem; }
+      .container { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="plus">+</div>
+  <h1>5-Tage-Challenge <span>Buch App</span></h1>
+</header>
+
+<div class="container">
+
+  <!-- API Key -->
+  <div class="section">
+    <div class="section-title">API-Konfiguration</div>
+    <label for="apiKey">Anthropic API Key</label>
+    <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
+  </div>
+
+  <!-- Book Meta -->
+  <div class="section">
+    <div class="section-title">Buchinformationen</div>
+    <label for="bookTitle">Buchtitel</label>
+    <input type="text" id="bookTitle" placeholder="Dein Buchtitel">
+    <div class="row">
+      <div>
+        <label for="bookSubtitle">Untertitel</label>
+        <input type="text" id="bookSubtitle" placeholder="Optional">
+      </div>
+      <div>
+        <label for="bookAuthor">Autor</label>
+        <input type="text" id="bookAuthor" placeholder="Vorname Nachname">
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload -->
+  <div class="section">
+    <div class="section-title">Transkripte hochladen</div>
+
+    <div class="drop-zone" id="dropZone">
+      <div class="icon">+</div>
+      <p>Dateien hierher ziehen oder klicken zum Auswaehlen</p>
+      <p style="font-size: 0.75rem; margin-top: 0.25rem; color: var(--border);">.txt, .md, .docx</p>
+      <input type="file" id="fileInput" multiple accept=".txt,.md,.docx">
+    </div>
+
+    <div class="add-text-section">
+      <label for="pasteText">Oder Text direkt einfuegen:</label>
+      <div class="add-text-row">
+        <textarea id="pasteText" placeholder="Transkript hier einfuegen..."></textarea>
+        <button class="btn btn-secondary" onclick="addPastedText()" style="align-self: flex-end;">Hinzufuegen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chapters -->
+  <div class="section">
+    <div class="section-title">Kapitel</div>
+    <div id="chapterList" class="chapter-list">
+      <div class="empty-state">Noch keine Transkripte hinzugefuegt.</div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="section" id="progressSection" style="display:none;">
+    <div class="section-title">Fortschritt</div>
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-text" id="progressText">Bereit</div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn btn-primary" id="generateBtn" onclick="generateBook()">Buch generieren</button>
+    <button class="btn btn-secondary" id="downloadBtn" onclick="downloadDocx()" style="display:none;">DOCX herunterladen</button>
+  </div>
+
+</div>
+
+<script>
+// ── State ──
+let chapters = [];
+let draggedIndex = null;
+
+// ── File Upload ──
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('drag-over');
+});
+
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  handleFiles(e.dataTransfer.files);
+});
+
+fileInput.addEventListener('change', (e) => {
+  handleFiles(e.target.files);
+  fileInput.value = '';
+});
+
+async function handleFiles(files) {
+  for (const file of files) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    let text = '';
+
+    if (ext === 'docx') {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        text = result.value;
+      } catch (err) {
+        showToast('Fehler beim Lesen von ' + file.name, 'error');
+        continue;
+      }
+    } else {
+      text = await file.text();
+    }
+
+    const title = file.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+    addChapter(title, text);
+  }
+}
+
+function addPastedText() {
+  const textarea = document.getElementById('pasteText');
+  const text = textarea.value.trim();
+  if (!text) return;
+
+  const num = chapters.length + 1;
+  addChapter('Kapitel ' + num, text);
+  textarea.value = '';
+}
+
+function addChapter(title, text) {
+  chapters.push({
+    title,
+    transcript: text,
+    generated: null,
+    status: 'pending'
+  });
+  renderChapters();
+}
+
+// ── Render Chapters ──
+function renderChapters() {
+  const list = document.getElementById('chapterList');
+
+  if (chapters.length === 0) {
+    list.innerHTML = '<div class="empty-state">Noch keine Transkripte hinzugefuegt.</div>';
+    return;
+  }
+
+  list.innerHTML = chapters.map((ch, i) => {
+    const wordCount = ch.transcript.split(/\s+/).length;
+    const preview = ch.transcript.substring(0, 150).replace(/</g, '&lt;') + (ch.transcript.length > 150 ? '...' : '');
+    const statusClass = 'status-' + ch.status;
+    const statusLabel = { pending: 'Ausstehend', processing: 'Wird verarbeitet...', done: 'Fertig', error: 'Fehler' }[ch.status];
+
+    return `
+      <div class="chapter-card" draggable="true" data-index="${i}"
+           ondragstart="onDragStart(event, ${i})"
+           ondragover="onDragOver(event)"
+           ondrop="onDrop(event, ${i})"
+           ondragend="onDragEnd(event)">
+        <div class="chapter-card-header">
+          <div class="chapter-number">${i + 1}</div>
+          <input class="chapter-title-input" value="${ch.title.replace(/"/g, '&quot;')}"
+                 onchange="chapters[${i}].title = this.value">
+          <button class="btn-danger" onclick="removeChapter(${i})">Entfernen</button>
+        </div>
+        <div class="chapter-preview">${preview}</div>
+        <div class="chapter-meta">
+          <span>${wordCount.toLocaleString('de-DE')} Woerter</span>
+          <span class="chapter-status ${statusClass}">${statusLabel}</span>
+        </div>
+        ${ch.generated ? `
+          <div class="chapter-meta" style="margin-top: 0.25rem;">
+            <button class="preview-toggle" onclick="togglePreview(${i})">Vorschau anzeigen/ausblenden</button>
+          </div>
+          <div class="preview-content" id="preview-${i}">${ch.generated.replace(/</g, '&lt;').substring(0, 2000)}${ch.generated.length > 2000 ? '\n\n... (gekuerzt)' : ''}</div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function removeChapter(index) {
+  chapters.splice(index, 1);
+  renderChapters();
+}
+
+function togglePreview(index) {
+  const el = document.getElementById('preview-' + index);
+  if (el) el.classList.toggle('open');
+}
+
+// ── Drag & Drop Reorder ──
+function onDragStart(e, index) {
+  draggedIndex = index;
+  e.currentTarget.classList.add('dragging');
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+}
+
+function onDrop(e, targetIndex) {
+  e.preventDefault();
+  if (draggedIndex === null || draggedIndex === targetIndex) return;
+  const item = chapters.splice(draggedIndex, 1)[0];
+  chapters.splice(targetIndex, 0, item);
+  draggedIndex = null;
+  renderChapters();
+}
+
+function onDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  draggedIndex = null;
+}
+
+// ── Generate Book ──
+async function generateBook() {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const bookTitle = document.getElementById('bookTitle').value.trim();
+
+  if (!apiKey) { showToast('Bitte API Key eingeben.', 'error'); return; }
+  if (chapters.length === 0) { showToast('Bitte mindestens ein Transkript hinzufuegen.', 'error'); return; }
+
+  const generateBtn = document.getElementById('generateBtn');
+  const progressSection = document.getElementById('progressSection');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+
+  generateBtn.disabled = true;
+  progressSection.style.display = 'block';
+
+  for (let i = 0; i < chapters.length; i++) {
+    chapters[i].status = 'processing';
+    renderChapters();
+    progressBar.style.width = ((i / chapters.length) * 100) + '%';
+    progressText.textContent = `Kapitel ${i + 1} von ${chapters.length} wird verarbeitet...`;
+
+    try {
+      const response = await fetch('/api/generate-chapter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey,
+          transcript: chapters[i].transcript,
+          chapterTitle: chapters[i].title,
+          bookTitle: bookTitle || 'Ohne Titel',
+          chapterNumber: i + 1
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'API-Fehler');
+      }
+
+      const data = await response.json();
+      chapters[i].generated = data.content;
+      chapters[i].status = 'done';
+    } catch (err) {
+      chapters[i].status = 'error';
+      chapters[i].generated = null;
+      showToast(`Fehler bei Kapitel ${i + 1}: ${err.message}`, 'error');
+    }
+
+    renderChapters();
+  }
+
+  progressBar.style.width = '100%';
+  progressText.textContent = 'Alle Kapitel verarbeitet!';
+  generateBtn.disabled = false;
+
+  const successCount = chapters.filter(c => c.status === 'done').length;
+  if (successCount > 0) {
+    document.getElementById('downloadBtn').style.display = '';
+    showToast(`${successCount} Kapitel erfolgreich generiert!`, 'success');
+  }
+}
+
+// ── DOCX Generation ──
+async function downloadDocx() {
+  const bookTitle = document.getElementById('bookTitle').value.trim() || 'Mein Buch';
+  const bookSubtitle = document.getElementById('bookSubtitle').value.trim();
+  const bookAuthor = document.getElementById('bookAuthor').value.trim();
+
+  const doneChapters = chapters.filter(c => c.status === 'done' && c.generated);
+  if (doneChapters.length === 0) { showToast('Keine fertigen Kapitel vorhanden.', 'error'); return; }
+
+  const { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel, PageBreak,
+          Header, Footer, BorderStyle, ShadingType, TabStopPosition, TabStopType,
+          convertInchesToTwip } = docx;
+
+  // BERENT.AI Colors
+  const BRAND_GOLD = 'B5742A';
+  const BRAND_GOLD_LIGHT = 'E8C98A';
+  const BRAND_DARK = '1A1410';
+  const TEXT_DEFAULT = '2A2018';
+  const TEXT_MUTED = '7A6A58';
+  const BOX_BG = 'FDF8F3';
+  const SEPARATOR = 'D4C4B0';
+
+  // Build chapter sections
+  const children = [];
+
+  // ── Title Page ──
+  children.push(
+    new Paragraph({ spacing: { before: 3000 } }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [new TextRun({ text: '+', font: 'Arial', size: 120, color: BRAND_GOLD_LIGHT, bold: false })]
+    }),
+    new Paragraph({ spacing: { before: 400 } }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [new TextRun({ text: bookTitle, font: 'Arial', size: 56, color: BRAND_GOLD, bold: true })]
+    })
+  );
+
+  if (bookSubtitle) {
+    children.push(
+      new Paragraph({ spacing: { before: 200 } }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: bookSubtitle, font: 'Arial', size: 28, color: TEXT_MUTED, italics: true })]
+      })
+    );
+  }
+
+  children.push(new Paragraph({ spacing: { before: 600 } }));
+
+  if (bookAuthor) {
+    children.push(
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: bookAuthor, font: 'Arial', size: 24, color: TEXT_DEFAULT })]
+      })
+    );
+  }
+
+  const today = new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long' });
+  children.push(
+    new Paragraph({ spacing: { before: 200 } }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [new TextRun({ text: today, font: 'Arial', size: 20, color: TEXT_MUTED })]
+    }),
+    new Paragraph({ children: [new PageBreak()] })
+  );
+
+  // ── Chapters ──
+  doneChapters.forEach((chapter, index) => {
+    const chapterNum = index + 1;
+
+    // Chapter separator (not before first chapter)
+    if (index > 0) {
+      children.push(new Paragraph({ children: [new PageBreak()] }));
+    }
+
+    // H1 - Chapter Title
+    children.push(
+      new Paragraph({
+        spacing: { before: 400, after: 100 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: BRAND_GOLD, space: 6 } },
+        children: [
+          new TextRun({ text: `${chapterNum}  `, font: 'Arial', size: 34, color: BRAND_GOLD, bold: true }),
+          new TextRun({ text: chapter.title, font: 'Arial', size: 34, color: BRAND_GOLD, bold: true })
+        ]
+      }),
+      new Paragraph({ spacing: { before: 200 } })
+    );
+
+    // Parse chapter content (markdown to docx)
+    const lines = chapter.generated.split('\n');
+    let i = 0;
+
+    while (i < lines.length) {
+      const line = lines[i].trimEnd();
+
+      // Skip empty lines
+      if (line.trim() === '') {
+        i++;
+        continue;
+      }
+
+      // H2
+      if (line.startsWith('## ')) {
+        const heading = line.replace(/^## /, '').replace(/\*\*/g, '');
+        children.push(
+          new Paragraph({ spacing: { before: 300 } }),
+          new Paragraph({
+            spacing: { before: 100, after: 80 },
+            children: [
+              new TextRun({ text: '+  ', font: 'Arial', size: 24, color: BRAND_GOLD_LIGHT, bold: true }),
+              new TextRun({ text: heading, font: 'Arial', size: 24, color: BRAND_DARK, bold: true })
+            ]
+          })
+        );
+        i++;
+        continue;
+      }
+
+      // H3
+      if (line.startsWith('### ')) {
+        const heading = line.replace(/^### /, '').replace(/\*\*/g, '');
+        children.push(
+          new Paragraph({ spacing: { before: 200 } }),
+          new Paragraph({
+            spacing: { before: 80, after: 60 },
+            children: [
+              new TextRun({ text: heading, font: 'Arial', size: 22, color: BRAND_GOLD, bold: true })
+            ]
+          })
+        );
+        i++;
+        continue;
+      }
+
+      // Regular paragraph - collect lines until empty line or heading
+      let paragraphText = '';
+      while (i < lines.length && lines[i].trim() !== '' && !lines[i].startsWith('#')) {
+        if (paragraphText) paragraphText += ' ';
+        paragraphText += lines[i].trim();
+        i++;
+      }
+
+      if (paragraphText) {
+        // Parse inline formatting (bold and italic)
+        const runs = parseInlineFormatting(paragraphText, TEXT_DEFAULT);
+        children.push(
+          new Paragraph({
+            alignment: AlignmentType.JUSTIFIED,
+            spacing: { after: 120, line: 336 },
+            children: runs
+          })
+        );
+      }
+
+      if (i < lines.length && lines[i].trim() === '') i++;
+    }
+  });
+
+  function parseInlineFormatting(text, defaultColor) {
+    const runs = [];
+    const regex = /(\*\*\*(.+?)\*\*\*|\*\*(.+?)\*\*|\*(.+?)\*)/g;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        runs.push(new TextRun({
+          text: text.slice(lastIndex, match.index),
+          font: 'Arial', size: 21, color: defaultColor
+        }));
+      }
+
+      if (match[2]) {
+        // bold + italic
+        runs.push(new TextRun({
+          text: match[2], font: 'Arial', size: 21, color: defaultColor, bold: true, italics: true
+        }));
+      } else if (match[3]) {
+        // bold
+        runs.push(new TextRun({
+          text: match[3], font: 'Arial', size: 21, color: defaultColor, bold: true
+        }));
+      } else if (match[4]) {
+        // italic
+        runs.push(new TextRun({
+          text: match[4], font: 'Arial', size: 21, color: defaultColor, italics: true
+        }));
+      }
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < text.length) {
+      runs.push(new TextRun({
+        text: text.slice(lastIndex),
+        font: 'Arial', size: 21, color: defaultColor
+      }));
+    }
+
+    if (runs.length === 0) {
+      runs.push(new TextRun({ text, font: 'Arial', size: 21, color: defaultColor }));
+    }
+
+    return runs;
+  }
+
+  // ── Create Document ──
+  const doc = new Document({
+    sections: [{
+      properties: {
+        page: {
+          size: { width: 11906, height: 16838 },
+          margin: { top: 1701, bottom: 1701, left: 1418, right: 1418 }
+        }
+      },
+      footers: {
+        default: new Footer({
+          children: [
+            new Paragraph({
+              border: { top: { style: BorderStyle.SINGLE, size: 4, color: SEPARATOR, space: 6 } },
+              alignment: AlignmentType.LEFT,
+              spacing: { before: 120 },
+              children: [
+                new TextRun({ text: '+  ', font: 'Arial', size: 16, color: BRAND_GOLD_LIGHT }),
+                new TextRun({ text: 'BERENT.AI', font: 'Arial', size: 16, color: TEXT_MUTED })
+              ]
+            })
+          ]
+        })
+      },
+      children
+    }]
+  });
+
+  // ── Save ──
+  const blob = await Packer.toBlob(doc);
+  const filename = bookTitle.replace(/[^a-zA-Z0-9äöüÄÖÜß ]/g, '').replace(/\s+/g, '_') + '.docx';
+  saveAs(blob, filename);
+  showToast('DOCX wurde heruntergeladen!', 'success');
+}
+
+// ── Toast ──
+function showToast(message, type) {
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+</script>
+
+</body>
+</html>
