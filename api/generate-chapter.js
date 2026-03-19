@@ -50,7 +50,7 @@ Erstelle nun das vollständig ausgearbeitete Buchkapitel aus diesem Transkript. 
     const client = new Anthropic({ apiKey });
 
     const message = await client.messages.create({
-      model: "claude-sonnet-4-6-20250514",
+      model: "claude-sonnet-4-20250514",
       max_tokens: 16000,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userPrompt }],
