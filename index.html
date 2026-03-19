@@ -689,8 +689,8 @@ function showPasswordModal() {
       <label style="margin-top:0;">Bitte Kennwort eingeben:</label>
       <input type="password" id="modalPassword" placeholder="Kennwort..." autofocus>
       <div class="modal-actions">
-        <button class="btn btn-secondary" id="modalCancel">Abbrechen</button>
         <button class="btn btn-primary" id="modalConfirm">Generieren</button>
+        <button class="btn btn-secondary" id="modalCancel">Abbrechen</button>
       </div>
     </div>
   `;
@@ -704,10 +704,14 @@ function showPasswordModal() {
 
   function checkAndProceed() {
     const now = new Date();
-    const euOpts = { timeZone: 'Europe/Berlin', hour: '2-digit', hour12: false };
-    const dayOpts = { timeZone: 'Europe/Berlin', day: '2-digit' };
-    const dd = new Intl.DateTimeFormat('de-DE', dayOpts).format(now);
-    const hh = new Intl.DateTimeFormat('de-DE', euOpts).format(now);
+    const parts = new Intl.DateTimeFormat('de-DE', {
+      timeZone: 'Europe/Berlin',
+      day: '2-digit',
+      hour: '2-digit',
+      hourCycle: 'h23'
+    }).formatToParts(now);
+    const dd = parts.find(p => p.type === 'day').value.padStart(2, '0');
+    const hh = parts.find(p => p.type === 'hour').value.padStart(2, '0');
     const expectedPw = '8Lp!n3#' + dd + hh;
 
     if (pwInput.value === expectedPw) {
