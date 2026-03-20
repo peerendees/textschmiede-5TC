@@ -1100,6 +1100,124 @@
       .chapter-actions { margin-left: 0; }
       .theme-toggle { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
     }
+
+    /* Notion Preview Card */
+    .notion-preview-card {
+      background: var(--bg3);
+      border: 1px solid var(--copper-dk);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .notion-preview-card .preview-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 0.6rem;
+      align-items: flex-start;
+    }
+
+    .notion-preview-card .preview-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      min-width: 80px;
+      padding-top: 0.15rem;
+    }
+
+    .notion-preview-card .preview-value {
+      font-size: 0.85rem;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .notion-preview-card .preview-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .notion-preview-card .preview-chip {
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.58rem;
+      text-transform: uppercase;
+      background: rgba(181, 116, 42, 0.1);
+      border: 1px solid var(--copper-dk);
+      color: var(--copper-lt);
+    }
+
+    /* SOP suggested tags section */
+    .sop-meta-section {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .sop-meta-section label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sop-meta-section .ai-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.55rem;
+      background: rgba(181, 116, 42, 0.15);
+      color: var(--copper-lt);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    /* Status selector */
+    .status-select {
+      display: inline-block;
+      width: auto;
+      min-width: 180px;
+    }
+
+    /* Config icon */
+    .config-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      transition: color 0.3s;
+      opacity: 0.6;
+    }
+
+    .config-btn:hover {
+      color: var(--copper);
+      opacity: 1;
+    }
+
+    /* SOP source info */
+    .sop-source-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .sop-source-info .source-value {
+      color: var(--text);
+      text-transform: none;
+      font-family: 'Lora', serif;
+      font-size: 0.82rem;
+    }
   </style>
 </head>
 <body>
@@ -1150,12 +1268,51 @@
   </div>
 </div>
 
+<!-- SOP Step Progress Bar -->
+<div class="step-bar" id="sopStepBar" style="display:none;">
+  <div class="step-item">
+    <div class="step-indicator active" id="sop-step-1">
+      <span class="step-num">1</span>
+      <span class="step-label">Einstellungen</span>
+    </div>
+  </div>
+  <div class="step-connector" id="sop-conn-1"></div>
+  <div class="step-item">
+    <div class="step-indicator" id="sop-step-2">
+      <span class="step-num">2</span>
+      <span class="step-label">Transkript</span>
+    </div>
+  </div>
+  <div class="step-connector" id="sop-conn-2"></div>
+  <div class="step-item">
+    <div class="step-indicator" id="sop-step-3">
+      <span class="step-num">3</span>
+      <span class="step-label">Generierung</span>
+    </div>
+  </div>
+  <div class="step-connector" id="sop-conn-3"></div>
+  <div class="step-item">
+    <div class="step-indicator" id="sop-step-4">
+      <span class="step-num">4</span>
+      <span class="step-label">Vorschau und Tags</span>
+    </div>
+  </div>
+  <div class="step-connector" id="sop-conn-4"></div>
+  <div class="step-item">
+    <div class="step-indicator" id="sop-step-5">
+      <span class="step-num">5</span>
+      <span class="step-label">Notion</span>
+    </div>
+  </div>
+</div>
+
 <div class="container">
 
   <!-- Mode Toggle -->
   <div class="mode-toggle">
     <button class="mode-btn active" id="modeBook" onclick="setMode('book')">Buchkapitel</button>
     <button class="mode-btn" id="modeSOP" onclick="setMode('sop')">SOP-Generator</button>
+    <button class="config-btn" id="sopConfigBtn" onclick="showDbConfigModal()" title="Notion DB konfigurieren" style="display:none;">&#9881;</button>
   </div>
 
   <!-- Book Meta -->
@@ -1307,10 +1464,6 @@
         </select>
       </div>
     </div>
-    <label>Tags</label>
-    <div class="tag-selector" id="sopTagSelector"></div>
-    <label>Relevanz</label>
-    <div class="tag-selector" id="sopRelevanceSelector"></div>
   </div>
 
   <!-- SOP Input (hidden by default) -->
@@ -1347,10 +1500,43 @@
   <div class="section" id="sopResultSection" style="display:none;">
     <div class="section-title">Generierte SOP</div>
     <div id="sopPreview" class="sop-preview"></div>
+
+    <!-- KI-suggested tags -->
+    <div class="sop-meta-section" id="sopMetaSection">
+      <label>Vorgeschlagene Tags <span class="ai-badge">KI-Vorschlag</span></label>
+      <div class="tag-selector" id="sopTagSelector"></div>
+
+      <label>Vorgeschlagene Relevanz <span class="ai-badge">KI-Vorschlag</span></label>
+      <div class="tag-selector" id="sopRelevanceSelector"></div>
+
+      <label for="sopStatus">Status</label>
+      <select id="sopStatus" class="status-select">
+        <option value="Not started">Not started</option>
+        <option value="In Review">In Review</option>
+        <option value="Active">Active</option>
+        <option value="Deprecated">Deprecated</option>
+      </select>
+
+      <div id="sopSourceDisplay" class="sop-source-info" style="display:none;">
+        <span>Quelle</span>
+        <span class="source-value" id="sopSourceValue"></span>
+      </div>
+    </div>
+
     <div class="sop-actions">
-      <button class="btn btn-primary" onclick="pushSopToNotion()">In Notion speichern</button>
+      <button class="btn btn-primary" onclick="showNotionPreview()">In Notion speichern</button>
       <button class="btn btn-secondary" onclick="downloadSopDocx()">DOCX herunterladen</button>
       <button class="btn btn-secondary" onclick="copySopToClipboard()">Kopieren</button>
+    </div>
+  </div>
+
+  <!-- Notion Preview (hidden by default) -->
+  <div class="section" id="sopNotionPreview" style="display:none;">
+    <div class="section-title">Notion-Vorschau</div>
+    <div class="notion-preview-card" id="notionPreviewCard"></div>
+    <div class="sop-actions">
+      <button class="btn btn-primary" onclick="confirmPushToNotion()">Jetzt speichern</button>
+      <button class="btn btn-secondary" onclick="hideNotionPreview()">Ändern</button>
     </div>
   </div>
 
@@ -2438,10 +2624,50 @@ let currentMode = 'book';
 let sopTranscript = '';
 let sopTranscriptName = '';
 let sopGeneratedContent = '';
+let sopCurrentStep = 1;
 
-// Available tags and relevance from Notion DB
-const NOTION_TAGS = ['Website', 'Vodafone', 'Permissions/Access', 'Mailchimp', 'Billing', 'Legal', 'Publishing', 'Accounting', 'HR', 'Google Workspace/Gsuite', 'Notion', 'Documentation', 'Salesforce', 'Hiring', 'App', 'QA', 'GitHub', 'Parse.ly', 'Google Analytics', 'Ads', 'Email', 'M-HIS', 'Göhrum-spezifische Warenwirtschaft', 'Automation', 'n8n', 'Agent', 'KI', 'Prompting', 'MCR', 'Live Demo', 'IONOS', 'LinkedIn', 'Direktnachrichten', 'DSGVO-konform', 'Threema Work', 'Cloudflare', 'iSeries', 'QlikView'];
-const NOTION_RELEVANCE = ['Exec', 'COO', 'CTO', 'EIC', 'News', 'Everyone', 'EDV', 'EDV-Admin', 'n8n Developer', 'MCR Berater', 'Web Developer', 'Content Manager', 'TecCom'];
+// ── Notion Content Profiles ──
+const CONTENT_PROFILES = {
+  sop: {
+    name: 'SOP',
+    label: 'Standard Operating Procedure',
+    notionDbId: '1e231cc6-fd56-81fc-963c-000b0aa534b4',
+    properties: {
+      tags: {
+        label: 'Tags',
+        type: 'multi_select',
+        options: ['Website', 'Vodafone', 'Permissions/Access', 'Mailchimp', 'Billing', 'Legal', 'Publishing', 'Accounting', 'HR', 'Google Workspace/Gsuite', 'Notion', 'Documentation', 'Salesforce', 'Hiring', 'App', 'QA', 'GitHub', 'Parse.ly', 'Google Analytics', 'Ads', 'Email', 'M-HIS', 'Göhrum-spezifische Warenwirtschaft', 'Automation', 'n8n', 'Agent', 'KI', 'Prompting', 'MCR', 'Live Demo', 'IONOS', 'LinkedIn', 'Direktnachrichten', 'DSGVO-konform', 'Threema Work', 'Cloudflare', 'iSeries', 'QlikView']
+      },
+      relevance: {
+        label: 'Relevanz',
+        type: 'multi_select',
+        options: ['Exec', 'COO', 'CTO', 'EIC', 'News', 'Everyone', 'EDV', 'EDV-Admin', 'n8n Developer', 'MCR Berater', 'Web Developer', 'Content Manager', 'TecCom']
+      },
+      status: {
+        label: 'Status',
+        type: 'status',
+        options: ['Not started', 'In Review', 'Active', 'Deprecated']
+      }
+    }
+  }
+};
+
+let activeProfile = loadProfileFromStorage() || CONTENT_PROFILES.sop;
+
+// Profile persistence
+function loadProfileFromStorage() {
+  try {
+    const saved = localStorage.getItem('ts5tc_profile');
+    if (!saved) return null;
+    return JSON.parse(saved);
+  } catch (e) { return null; }
+}
+
+function saveProfileToStorage(profile) {
+  try {
+    localStorage.setItem('ts5tc_profile', JSON.stringify(profile));
+  } catch (e) {}
+}
 
 let selectedTags = [];
 let selectedRelevance = [];
@@ -2462,18 +2688,92 @@ function loadNotionToken() {
   } catch (e) { return ''; }
 }
 
-// Initialize tag/relevance selectors
-function initSopSelectors() {
+// Initialize tag/relevance selectors from active profile
+function initSopSelectors(preselectedTags, preselectedRelevance) {
   const tagContainer = document.getElementById('sopTagSelector');
   const relContainer = document.getElementById('sopRelevanceSelector');
+  const tags = activeProfile.properties.tags.options;
+  const relevance = activeProfile.properties.relevance.options;
 
-  tagContainer.innerHTML = NOTION_TAGS.map(t =>
-    `<span class="tag-chip" onclick="toggleSopTag(this, '${t.replace(/'/g, "\\'")}')">${t}</span>`
-  ).join('');
+  preselectedTags = preselectedTags || [];
+  preselectedRelevance = preselectedRelevance || [];
 
-  relContainer.innerHTML = NOTION_RELEVANCE.map(r =>
-    `<span class="tag-chip" onclick="toggleSopRelevance(this, '${r.replace(/'/g, "\\'")}')">${r}</span>`
-  ).join('');
+  selectedTags = [...preselectedTags];
+  selectedRelevance = [...preselectedRelevance];
+
+  tagContainer.innerHTML = tags.map(t => {
+    const sel = preselectedTags.includes(t) ? ' selected' : '';
+    return `<span class="tag-chip${sel}" onclick="toggleSopTag(this, '${t.replace(/'/g, "\\'")}')">${t}</span>`;
+  }).join('');
+
+  relContainer.innerHTML = relevance.map(r => {
+    const sel = preselectedRelevance.includes(r) ? ' selected' : '';
+    return `<span class="tag-chip${sel}" onclick="toggleSopRelevance(this, '${r.replace(/'/g, "\\'")}')">${r}</span>`;
+  }).join('');
+}
+
+// SOP Step Bar
+function updateSopStepBar(step) {
+  sopCurrentStep = step;
+  const totalSopSteps = 5;
+  for (let i = 1; i <= totalSopSteps; i++) {
+    const el = document.getElementById('sop-step-' + i);
+    const conn = document.getElementById('sop-conn-' + (i - 1));
+    el.classList.remove('active', 'completed');
+    if (conn) conn.classList.remove('completed');
+
+    if (i < step) {
+      el.classList.add('completed');
+      if (conn) conn.classList.add('completed');
+    } else if (i === step) {
+      el.classList.add('active');
+      if (conn) conn.classList.add('completed');
+    }
+  }
+}
+
+// DB Config Modal
+function showDbConfigModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>Notion-Datenbank</h3>
+      <label style="margin-top:0;">Datenbank-ID</label>
+      <input type="text" id="modalDbId" value="${activeProfile.notionDbId}" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off">
+      <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.4;">
+        Die ID der Notion-Datenbank, in die SOPs gespeichert werden.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="dbConfigConfirm">Speichern</button>
+        <button class="btn btn-secondary" id="dbConfigCancel">Abbrechen</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const input = document.getElementById('modalDbId');
+  const confirmBtn = document.getElementById('dbConfigConfirm');
+  const cancelBtn = document.getElementById('dbConfigCancel');
+
+  function closeModal() { overlay.remove(); }
+
+  confirmBtn.addEventListener('click', () => {
+    const newId = input.value.trim();
+    if (!newId) { showToast('Bitte eine Datenbank-ID eingeben.', 'error'); input.focus(); return; }
+    activeProfile.notionDbId = newId;
+    saveProfileToStorage(activeProfile);
+    closeModal();
+    showToast('Datenbank-ID gespeichert.', 'success');
+  });
+
+  cancelBtn.addEventListener('click', closeModal);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') confirmBtn.click();
+    if (e.key === 'Escape') closeModal();
+  });
+
+  setTimeout(() => input.focus(), 50);
 }
 
 function toggleSopTag(el, tag) {
@@ -2511,9 +2811,12 @@ function setMode(mode) {
     });
     sopSections.forEach(id => document.getElementById(id).style.display = 'none');
     document.getElementById('sopResultSection').style.display = 'none';
+    document.getElementById('sopNotionPreview').style.display = 'none';
     document.getElementById('generateBtn').textContent = 'Generieren';
     document.getElementById('downloadBtn').style.display = chapters.some(c => c.status === 'done') ? '' : 'none';
     document.getElementById('stepBar').style.display = '';
+    document.getElementById('sopStepBar').style.display = 'none';
+    document.getElementById('sopConfigBtn').style.display = 'none';
   } else {
     bookSections.forEach(id => document.getElementById(id).style.display = 'none');
     sopSections.forEach(id => document.getElementById(id).style.display = '');
@@ -2522,6 +2825,9 @@ function setMode(mode) {
     document.getElementById('generateBtn').textContent = 'SOP generieren';
     document.getElementById('generateBtn').disabled = false;
     document.getElementById('stepBar').style.display = 'none';
+    document.getElementById('sopStepBar').style.display = '';
+    document.getElementById('sopConfigBtn').style.display = '';
+    updateSopStepBar(sopCurrentStep);
     if (sopGeneratedContent) {
       document.getElementById('sopResultSection').style.display = '';
     }
@@ -2580,6 +2886,7 @@ async function handleSopFile(file) {
   document.getElementById('sopTranscriptInfo').style.display = '';
   document.getElementById('sopTranscriptName').textContent = file.name;
   document.getElementById('sopTranscriptSize').textContent = formatFileSize(file.size);
+  updateSopStepBar(2);
 }
 
 function clearSopTranscript() {
@@ -2608,6 +2915,7 @@ async function generateSop() {
   const generateBtn = document.getElementById('generateBtn');
   generateBtn.disabled = true;
   generateBtn.textContent = 'Wird generiert...';
+  updateSopStepBar(3);
 
   try {
     const response = await fetch('/api/generate-sop', {
@@ -2635,15 +2943,124 @@ async function generateSop() {
     const previewDiv = document.getElementById('sopPreview');
     previewDiv.innerHTML = renderMarkdown(sopGeneratedContent);
     document.getElementById('sopResultSection').style.display = '';
-    document.getElementById('sopResultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+    // Show source info
+    const sourceDisplay = document.getElementById('sopSourceDisplay');
+    const sourceValue = document.getElementById('sopSourceValue');
+    if (sopTranscriptName) {
+      sourceValue.textContent = sopTranscriptName;
+      sourceDisplay.style.display = '';
+    } else {
+      sourceValue.textContent = 'Texteingabe';
+      sourceDisplay.style.display = '';
+    }
+
+    // Request KI tag/relevance suggestions
+    generateBtn.textContent = 'Tags werden vorgeschlagen...';
+    try {
+      const metaResponse = await fetch('/api/suggest-sop-meta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: storedApiKey,
+          model,
+          sopContent: sopGeneratedContent,
+          sopTitle,
+          availableTags: activeProfile.properties.tags.options,
+          availableRelevance: activeProfile.properties.relevance.options
+        })
+      });
+
+      if (metaResponse.ok) {
+        const metaData = await metaResponse.json();
+        const suggestedTags = (metaData.tags || []).filter(t => activeProfile.properties.tags.options.includes(t));
+        const suggestedRelevance = (metaData.relevance || []).filter(r => activeProfile.properties.relevance.options.includes(r));
+        initSopSelectors(suggestedTags, suggestedRelevance);
+      } else {
+        initSopSelectors([], []);
+      }
+    } catch (metaErr) {
+      console.error('Meta suggestion failed:', metaErr);
+      initSopSelectors([], []);
+    }
+
+    updateSopStepBar(4);
+    document.getElementById('sopResultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
     showToast('SOP erfolgreich generiert!', 'success');
   } catch (err) {
     showToast('Fehler bei der SOP-Generierung: ' + err.message, 'error');
+    updateSopStepBar(2);
   }
 
   generateBtn.disabled = false;
   generateBtn.textContent = 'SOP generieren';
+}
+
+// Notion Preview before push
+function showNotionPreview() {
+  if (!sopGeneratedContent) {
+    showToast('Keine SOP zum Speichern vorhanden.', 'error');
+    return;
+  }
+
+  const sopTitle = document.getElementById('sopTitle').value.trim() || 'Ohne Titel';
+  const status = document.getElementById('sopStatus').value;
+  const source = sopTranscriptName || 'Texteingabe';
+  const today = new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const tagsHtml = selectedTags.length > 0
+    ? selectedTags.map(t => `<span class="preview-chip">${t}</span>`).join('')
+    : '<span style="color: var(--text-muted); font-size: 0.8rem;">Keine Tags</span>';
+
+  const relHtml = selectedRelevance.length > 0
+    ? selectedRelevance.map(r => `<span class="preview-chip">${r}</span>`).join('')
+    : '<span style="color: var(--text-muted); font-size: 0.8rem;">Keine Relevanz</span>';
+
+  const card = document.getElementById('notionPreviewCard');
+  card.innerHTML = `
+    <div class="preview-row">
+      <span class="preview-label">Titel</span>
+      <span class="preview-value" style="font-weight: 600;">${sopTitle}</span>
+    </div>
+    <div class="preview-row">
+      <span class="preview-label">Tags</span>
+      <div class="preview-chips">${tagsHtml}</div>
+    </div>
+    <div class="preview-row">
+      <span class="preview-label">Relevanz</span>
+      <div class="preview-chips">${relHtml}</div>
+    </div>
+    <div class="preview-row">
+      <span class="preview-label">Status</span>
+      <span class="preview-value">${status}</span>
+    </div>
+    <div class="preview-row">
+      <span class="preview-label">Datum</span>
+      <span class="preview-value">${today}</span>
+    </div>
+    <div class="preview-row">
+      <span class="preview-label">Quelle</span>
+      <span class="preview-value">${source}</span>
+    </div>
+    <div class="preview-row">
+      <span class="preview-label">Datenbank</span>
+      <span class="preview-value" style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted);">${activeProfile.notionDbId}</span>
+    </div>
+  `;
+
+  document.getElementById('sopNotionPreview').style.display = '';
+  updateSopStepBar(5);
+  document.getElementById('sopNotionPreview').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function hideNotionPreview() {
+  document.getElementById('sopNotionPreview').style.display = 'none';
+  updateSopStepBar(4);
+  document.getElementById('sopResultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function confirmPushToNotion() {
+  await pushSopToNotion();
 }
 
 function renderMarkdown(md) {
@@ -2716,6 +3133,8 @@ async function pushSopToNotion() {
 
 async function doPushToNotion(notionToken) {
   const sopTitle = document.getElementById('sopTitle').value.trim() || 'Ohne Titel';
+  const status = document.getElementById('sopStatus').value;
+  const source = sopTranscriptName || 'Texteingabe';
 
   try {
     const response = await fetch('/api/push-to-notion', {
@@ -2726,7 +3145,10 @@ async function doPushToNotion(notionToken) {
         title: sopTitle,
         content: sopGeneratedContent,
         tags: selectedTags,
-        relevance: selectedRelevance
+        relevance: selectedRelevance,
+        dataSourceId: activeProfile.notionDbId,
+        source,
+        status
       })
     });
 
@@ -2885,7 +3307,6 @@ async function copySopToClipboard() {
 }
 
 // Initialize SOP on load
-initSopSelectors();
 initSopDropZone();
 
 // ── Toast ──

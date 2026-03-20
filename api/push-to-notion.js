@@ -3,7 +3,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { notionToken, title, content, tags, relevance, dataSourceId } = req.body;
+  const { notionToken, title, content, tags, relevance, dataSourceId, source, status } = req.body;
 
   if (!notionToken || !title || !content) {
     return res.status(400).json({ error: "notionToken, title, and content are required" });
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   // Build properties
   const properties = {
     Name: { title: [{ text: { content: title } }] },
-    Status: { status: { name: "Not started" } }
+    Status: { status: { name: status || "Not started" } }
   };
 
   // Add Tags if provided
@@ -28,6 +28,13 @@ export default async function handler(req, res) {
   if (relevance && Array.isArray(relevance) && relevance.length > 0) {
     properties.Relevance = {
       multi_select: relevance.map(r => ({ name: r }))
+    };
+  }
+
+  // Add Source if provided
+  if (source) {
+    properties.Quelle = {
+      rich_text: [{ text: { content: source } }]
     };
   }
 
