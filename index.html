@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Textschmiede</title>
+  <title>TEXTSCHMIEDE</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -114,12 +114,12 @@
     }
 
     header h1 {
-      font-family: 'Lora', serif;
-      font-size: 1.6rem;
-      font-weight: 600;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 400;
       color: var(--text);
-      letter-spacing: 0.02em;
-      text-transform: none;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
       user-select: none;
     }
 
@@ -550,11 +550,11 @@
       border-radius: 10px;
       background: var(--bg2);
       color: var(--text-muted);
-      font-family: 'Lora', serif;
-      font-size: 0.95rem;
-      font-weight: 600;
-      text-transform: none;
-      letter-spacing: 0.02em;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       cursor: pointer;
       transition: all 0.3s;
       text-align: center;
@@ -1397,7 +1397,7 @@
   <div class="step-item">
     <div class="step-indicator" id="step-4">
       <span class="step-num">4</span>
-      <span class="step-label">Generierung</span>
+      <span class="step-label">Generator</span>
     </div>
   </div>
   <div class="step-connector" id="conn-4"></div>
@@ -1428,7 +1428,7 @@
   <div class="step-item">
     <div class="step-indicator" id="sop-step-3">
       <span class="step-num">3</span>
-      <span class="step-label">Generierung</span>
+      <span class="step-label">Generator</span>
     </div>
   </div>
   <div class="step-connector" id="sop-conn-3"></div>
@@ -1584,7 +1584,7 @@
 
   <!-- SOP Settings (hidden by default) -->
   <div class="section" id="sopSettingsSection" style="display:none;">
-    <div class="section-title">SOP-Einstellungen <button class="config-btn" id="sopConfigBtn" onclick="showDbConfigModal()" title="Content-Profile verwalten" style="font-size: 1.1rem; margin-left: auto;">&#9881;</button></div>
+    <div class="section-title">SOP-Einstellungen <button class="config-btn" id="sopConfigBtn" onclick="showDbConfigModal()" title="Content-Profile verwalten" style="font-size: 1.4rem; margin-left: auto; padding: 0.3rem 0.5rem; border: 1px solid var(--border); border-radius: 20px;">&#9881;</button></div>
     <label for="sopTitle">SOP-Titel</label>
     <input type="text" id="sopTitle" placeholder="z.B. Neuen Mitarbeiter onboarden">
     <div class="row">
