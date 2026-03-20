@@ -883,6 +883,64 @@
 
     .preview-content.open { display: block; }
 
+    .preview-content h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      color: var(--copper);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: 1rem 0 0.4rem 0;
+    }
+
+    .preview-content h2:first-child { margin-top: 0; }
+
+    .preview-content h3 {
+      font-family: 'Lora', serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--gold-dim);
+      margin: 0.7rem 0 0.3rem 0;
+    }
+
+    .preview-content p {
+      margin-bottom: 0.5rem;
+    }
+
+    .preview-content strong { color: var(--copper-lt); }
+
+    /* Chapter action buttons */
+    .chapter-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-top: 0.25rem;
+      margin-left: 40px;
+    }
+
+    .btn-regen {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-regen:hover {
+      border-color: var(--copper);
+      color: var(--copper);
+    }
+
+    .btn-regen:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
     /* Actions */
     .actions {
       display: flex;
@@ -1062,6 +1120,37 @@
           <option value="claude-opus-4-20250514">Claude Opus 4 — Beste Qualität, 3-5 Min/Kapitel</option>
         </select>
       </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="outputTemplate">Vorlage</label>
+        <select id="outputTemplate">
+          <option value="buch">Buch — Ausführlicher Fließtext</option>
+          <option value="workbook">Workbook — Praxis & Übungen</option>
+          <option value="training">Training — Didaktisch strukturiert</option>
+          <option value="newsletter">Newsletter — Kompakt & direkt</option>
+        </select>
+      </div>
+      <div>
+        <label for="toneSetting">Ton</label>
+        <select id="toneSetting">
+          <option value="professionell">Professionell</option>
+          <option value="locker">Locker & nahbar</option>
+          <option value="sachlich">Sachlich & nüchtern</option>
+          <option value="inspirierend">Inspirierend & motivierend</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="detailLevel">Ausführlichkeit</label>
+        <select id="detailLevel">
+          <option value="ausfuehrlich">Ausführlich — Jeder Gedanke voll ausgearbeitet</option>
+          <option value="standard" selected>Standard — Ausgewogene Länge</option>
+          <option value="kompakt">Kompakt — Auf den Punkt</option>
+        </select>
+      </div>
+      <div></div>
     </div>
   </div>
 
@@ -1452,10 +1541,16 @@ function renderChapters() {
             <span class="chapter-status ${statusClass}">${statusLabel}</span>
           </div>
           ${ch.generated ? `
-            <div class="chapter-meta" style="margin-top: 0.25rem;">
-              <button class="preview-toggle" onclick="togglePreview(${i})">Vorschau anzeigen/ausblenden</button>
+            <div class="chapter-actions">
+              <button class="preview-toggle" onclick="togglePreview(${i})">Vorschau</button>
+              <button class="btn-regen" onclick="regenerateChapter(${i})">Neu generieren</button>
             </div>
-            <div class="preview-content" id="preview-${i}">${ch.generated.replace(/</g, '&lt;').substring(0, 2000)}${ch.generated.length > 2000 ? '\n\n... (gekürzt)' : ''}</div>
+            <div class="preview-content" id="preview-${i}">${renderChapterPreview(ch.generated)}</div>
+          ` : ''}
+          ${ch.status === 'error' ? `
+            <div class="chapter-actions">
+              <button class="btn-regen" onclick="regenerateChapter(${i})">Erneut versuchen</button>
+            </div>
           ` : ''}
         </div>
       </div>
@@ -1472,6 +1567,88 @@ function removeChapter(index) {
 function togglePreview(index) {
   const el = document.getElementById('preview-' + index);
   if (el) el.classList.toggle('open');
+}
+
+function renderChapterPreview(md) {
+  if (!md) return '';
+  // Render markdown to HTML for preview
+  let html = md
+    .substring(0, 3000) // limit for performance
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/### (.+)/g, '<h3>$1</h3>')
+    .replace(/## (.+)/g, '<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>');
+  if (md.length > 3000) html += '<p style="color: var(--text-muted); font-style: italic;">... (Vorschau gekürzt)</p>';
+  return '<p>' + html + '</p>';
+}
+
+// ── Einzelkapitel neu generieren ──
+async function regenerateChapter(index) {
+  if (!storedApiKey) {
+    showToast('Kein API-Key vorhanden. Bitte zuerst generieren.', 'error');
+    return;
+  }
+
+  const ch = chapters[index];
+  if (!ch) return;
+
+  const bookTitle = document.getElementById('bookTitle').value.trim();
+  const model = document.getElementById('aiModel').value;
+  const audience = document.getElementById('targetAudience').value;
+  const template = document.getElementById('outputTemplate').value;
+  const tone = document.getElementById('toneSetting').value;
+  const detail = document.getElementById('detailLevel').value;
+  const audienceLabel = { einsteiger: 'Einsteiger', fortgeschritten: 'Fortgeschrittene', experte: 'Experten' }[audience];
+
+  ch.status = 'processing';
+  ch.generated = null;
+  renderChapters();
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120000);
+
+    const response = await fetch('/api/generate-chapter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        apiKey: storedApiKey,
+        model,
+        audience: audienceLabel,
+        template,
+        tone,
+        detail,
+        transcript: ch.transcript,
+        chapterTitle: ch.title,
+        bookTitle: bookTitle || 'Ohne Titel',
+        chapterNumber: index + 1
+      })
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      let errMsg = `HTTP ${response.status}`;
+      try { const err = await response.json(); errMsg = err.error || errMsg; } catch (_) {}
+      throw new Error(errMsg);
+    }
+
+    const data = await response.json();
+    ch.generated = data.content;
+    ch.status = 'done';
+    showToast(`Kapitel ${index + 1} neu generiert!`, 'success');
+  } catch (err) {
+    ch.status = 'error';
+    const msg = err.name === 'AbortError' ? 'Zeitüberschreitung' : err.message;
+    showToast(`Fehler bei Kapitel ${index + 1}: ${msg}`, 'error');
+  }
+
+  renderChapters();
 }
 
 // ── Drag & Drop Reorder ──
@@ -1812,6 +1989,9 @@ async function generateBook(apiKey) {
   const bookTitle = document.getElementById('bookTitle').value.trim();
   const model = document.getElementById('aiModel').value;
   const audience = document.getElementById('targetAudience').value;
+  const template = document.getElementById('outputTemplate').value;
+  const tone = document.getElementById('toneSetting').value;
+  const detail = document.getElementById('detailLevel').value;
   const audienceLabel = { einsteiger: 'Einsteiger', fortgeschritten: 'Fortgeschrittene', experte: 'Experten' }[audience];
 
   updateStepBar(4);
@@ -1842,6 +2022,9 @@ async function generateBook(apiKey) {
           apiKey,
           model,
           audience: audienceLabel,
+          template,
+          tone,
+          detail,
           transcript: chapters[i].transcript,
           chapterTitle: chapters[i].title,
           bookTitle: bookTitle || 'Ohne Titel',
