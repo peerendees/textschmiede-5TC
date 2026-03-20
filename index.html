@@ -125,13 +125,14 @@
     .step-bar {
       background: var(--bg2);
       border-bottom: 1px solid var(--border);
-      padding: 1rem 2rem;
+      padding: 0.75rem 1rem;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 0;
       position: relative;
       z-index: 1;
+      overflow-x: auto;
     }
 
     .step-item {
@@ -143,13 +144,13 @@
     .step-indicator {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.45rem 1rem;
+      gap: 0.4rem;
+      padding: 0.4rem 0.75rem;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--bg3);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.03em;
@@ -163,12 +164,12 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 20px;
-      height: 20px;
-      border-radius: 5px;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
       background: var(--border);
       color: var(--text-muted);
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       font-weight: 500;
       flex-shrink: 0;
       transition: all 0.3s;
@@ -197,7 +198,7 @@
     }
 
     .step-connector {
-      width: 32px;
+      width: 20px;
       height: 1px;
       background: var(--border);
       flex-shrink: 0;
@@ -329,6 +330,165 @@
     }
 
     .btn-danger:hover { background: rgba(192, 57, 43, 0.15); }
+
+    /* Close / Remove button (×) */
+    .chapter-remove {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      cursor: pointer;
+      padding: 0 0.4rem;
+      line-height: 1;
+      transition: color 0.3s;
+      flex-shrink: 0;
+    }
+
+    .chapter-remove:hover { color: var(--danger); }
+
+    /* Select / Dropdown */
+    select {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: 'Lora', Georgia, serif;
+      transition: border-color 0.3s;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a6a58' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.85rem center;
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--copper);
+    }
+
+    select option {
+      background: var(--bg2);
+      color: var(--text);
+    }
+
+    /* Checkbox row */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      accent-color: var(--copper);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .checkbox-row label {
+      margin: 0;
+      cursor: pointer;
+      font-size: 0.7rem;
+    }
+
+    /* File size in chapter cards */
+    .chapter-filesize {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
+    /* Buchstruktur section */
+    .structure-recommendation {
+      background: var(--bg3);
+      border-left: 3px solid var(--copper);
+      border-radius: 0 8px 8px 0;
+      padding: 1rem 1.2rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .structure-recommendation strong {
+      color: var(--copper-lt);
+    }
+
+    .structure-chapter {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .structure-chapter-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .structure-chapter-title {
+      font-family: 'Lora', serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .structure-chapter-source {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .structure-chapter-desc {
+      font-size: 0.85rem;
+      color: var(--muted2);
+      line-height: 1.5;
+      margin-left: 40px;
+    }
+
+    .structure-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .structure-actions .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    .structure-loading {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--text-muted);
+      font-family: 'Lora', serif;
+      font-style: italic;
+    }
+
+    .structure-spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--copper);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-top: 0.75rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
 
     /* Input Mode Toggle */
     .input-toggle {
@@ -722,13 +882,20 @@
   <div class="step-item">
     <div class="step-indicator" id="step-3">
       <span class="step-num">3</span>
-      <span class="step-label">Generierung</span>
+      <span class="step-label">Struktur</span>
     </div>
   </div>
   <div class="step-connector" id="conn-3"></div>
   <div class="step-item">
     <div class="step-indicator" id="step-4">
       <span class="step-num">4</span>
+      <span class="step-label">Generierung</span>
+    </div>
+  </div>
+  <div class="step-connector" id="conn-4"></div>
+  <div class="step-item">
+    <div class="step-indicator" id="step-5">
+      <span class="step-num">5</span>
       <span class="step-label">Download</span>
     </div>
   </div>
@@ -743,12 +910,29 @@
     <input type="text" id="bookTitle" placeholder="Titel des Projekts">
     <div class="row">
       <div>
-        <label for="bookSubtitle">Untertitel</label>
-        <input type="text" id="bookSubtitle" placeholder="Optional">
+        <label for="bookSubtitle">Untertitel (optional)</label>
+        <input type="text" id="bookSubtitle" placeholder="z.B. Das Trainingshandbuch">
       </div>
       <div>
         <label for="bookAuthor">Autor</label>
         <input type="text" id="bookAuthor" placeholder="Vorname Nachname">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="targetAudience">Zielgruppe</label>
+        <select id="targetAudience">
+          <option value="einsteiger">Einsteiger</option>
+          <option value="fortgeschritten">Fortgeschrittene</option>
+          <option value="experte">Experten</option>
+        </select>
+      </div>
+      <div>
+        <label for="aiModel">KI-Modell</label>
+        <select id="aiModel">
+          <option value="claude-sonnet-4-20250514">Claude Sonnet 4 — Schnell, 1-2 Min/Kapitel</option>
+          <option value="claude-opus-4-20250514">Claude Opus 4 — Beste Qualität, 3-5 Min/Kapitel</option>
+        </select>
       </div>
     </div>
   </div>
@@ -792,6 +976,20 @@
     </div>
   </div>
 
+  <!-- Buchstruktur -->
+  <div class="section" id="structureSection" style="display:none;">
+    <div class="section-title">Buchstruktur planen</div>
+    <p style="font-size: 0.9rem; color: var(--muted2); margin-bottom: 1rem; line-height: 1.6;">
+      Claude analysiert alle Transkripte und schlägt eine optimale Kapitelstruktur vor.
+      Du kannst den Vorschlag anpassen, bevor die eigentliche Generierung startet.
+    </p>
+    <div class="structure-actions">
+      <button class="btn btn-primary" id="planStructureBtn" onclick="planStructure()">Struktur vorschlagen lassen</button>
+      <button class="btn btn-secondary" id="skipStructureBtn" onclick="skipStructure()">Überspringen</button>
+    </div>
+    <div id="structureResult"></div>
+  </div>
+
   <!-- Progress -->
   <div class="section" id="progressSection" style="display:none;">
     <div class="section-title">Fortschritt</div>
@@ -817,13 +1015,42 @@ let draggedIndex = null;
 let currentStep = 1;
 let passwordRequired = true;
 let inactivityTimer = null;
-let storedApiKey = '';
+let storedApiKey = loadApiKey();
 const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const TOTAL_STEPS = 5;
+
+// ── API Key Storage ──
+function saveApiKey(key) {
+  try {
+    // Simple obfuscation (not encryption — localStorage is domain-scoped)
+    const encoded = btoa(unescape(encodeURIComponent(key)));
+    localStorage.setItem('ts5tc_ak', encoded);
+  } catch (e) { /* silent fail if localStorage unavailable */ }
+}
+
+function loadApiKey() {
+  try {
+    const encoded = localStorage.getItem('ts5tc_ak');
+    if (!encoded) return '';
+    return decodeURIComponent(escape(atob(encoded)));
+  } catch (e) { return ''; }
+}
+
+function clearApiKey() {
+  try { localStorage.removeItem('ts5tc_ak'); } catch (e) {}
+}
+
+// ── Helpers ──
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(0) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
 
 // ── Step Bar ──
 function updateStepBar(step) {
   currentStep = step;
-  for (let i = 1; i <= 4; i++) {
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
     const el = document.getElementById('step-' + i);
     const conn = document.getElementById('conn-' + (i - 1));
     el.classList.remove('active', 'completed');
@@ -960,7 +1187,7 @@ async function handleFiles(files) {
     }
 
     const title = file.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
-    addChapter(title, text);
+    addChapter(title, text, file.name, file.size);
   }
   updateStepBar(2);
 }
@@ -971,15 +1198,18 @@ function addPastedText() {
   if (!text) return;
 
   const num = chapters.length + 1;
-  addChapter('Kapitel ' + num, text);
+  const byteSize = new Blob([text]).size;
+  addChapter('Kapitel ' + num, text, null, byteSize);
   textarea.value = '';
   updateStepBar(2);
 }
 
-function addChapter(title, text) {
+function addChapter(title, text, filename, fileSize) {
   chapters.push({
     title,
     transcript: text,
+    filename: filename || null,
+    fileSize: fileSize || new Blob([text]).size,
     generated: null,
     status: 'pending'
   });
@@ -1000,6 +1230,7 @@ function renderChapters() {
     const preview = ch.transcript.substring(0, 150).replace(/</g, '&lt;') + (ch.transcript.length > 150 ? '...' : '');
     const statusClass = 'status-' + ch.status;
     const statusLabel = { pending: 'Ausstehend', processing: 'Wird verarbeitet...', done: 'Fertig', error: 'Fehler' }[ch.status];
+    const sizeStr = formatFileSize(ch.fileSize || 0);
 
     return `
       <div class="chapter-card" data-index="${i}"
@@ -1015,7 +1246,8 @@ function renderChapters() {
             <div class="chapter-number">${i + 1}</div>
             <input class="chapter-title-input" value="${ch.title.replace(/"/g, '&quot;')}"
                    onchange="chapters[${i}].title = this.value">
-            <button class="btn-danger" onclick="removeChapter(${i})">Entfernen</button>
+            <span class="chapter-filesize">${sizeStr}</span>
+            <button class="chapter-remove" onclick="removeChapter(${i})" title="Entfernen">×</button>
           </div>
           <div class="chapter-preview">${preview}</div>
           <div class="chapter-meta">
@@ -1104,7 +1336,7 @@ function onDragEnd(e) {
   draggedIndex = null;
 }
 
-// ── Generate Flow: Generate Button → Password Modal → API Key Modal → Generate ──
+// ── Generate Flow: Generate → Password → API Key → Struktur → Generate ──
 function onGenerate() {
   if (chapters.length === 0) {
     showToast('Bitte mindestens ein Transkript hinzufügen.', 'error');
@@ -1116,6 +1348,139 @@ function onGenerate() {
   } else {
     showApiKeyModal();
   }
+}
+
+// ── Buchstruktur planen ──
+function showStructureStep() {
+  updateStepBar(3);
+  document.getElementById('structureSection').style.display = '';
+  document.getElementById('structureResult').innerHTML = '';
+  document.getElementById('planStructureBtn').disabled = false;
+  document.getElementById('generateBtn').disabled = true;
+  document.getElementById('structureSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function planStructure() {
+  const btn = document.getElementById('planStructureBtn');
+  btn.disabled = true;
+
+  const resultDiv = document.getElementById('structureResult');
+  resultDiv.innerHTML = `
+    <div class="structure-loading">
+      <p>Claude liest die Transkripte und plant die Buchstruktur...</p>
+      <div class="structure-spinner"></div>
+    </div>
+  `;
+
+  const summaries = chapters.map((ch, i) =>
+    `Kapitel ${i + 1}: "${ch.title}"${ch.filename ? ` (Quelle: ${ch.filename})` : ''}\n` +
+    `Inhalt (Auszug): ${ch.transcript.substring(0, 800)}...`
+  ).join('\n\n---\n\n');
+
+  const audience = document.getElementById('targetAudience').value;
+  const audienceLabel = { einsteiger: 'Einsteiger', fortgeschritten: 'Fortgeschrittene', experte: 'Experten' }[audience];
+
+  try {
+    const response = await fetch('/api/plan-structure', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        apiKey: storedApiKey,
+        model: document.getElementById('aiModel').value,
+        summaries,
+        bookTitle: document.getElementById('bookTitle').value.trim() || 'Ohne Titel',
+        audience: audienceLabel,
+        chapterCount: chapters.length
+      })
+    });
+
+    if (!response.ok) {
+      let errMsg = `HTTP ${response.status}`;
+      try { const err = await response.json(); errMsg = err.error || errMsg; } catch (_) {}
+      throw new Error(errMsg);
+    }
+
+    const data = await response.json();
+    displayStructureResult(data.structure);
+  } catch (err) {
+    resultDiv.innerHTML = '';
+    showToast('Fehler bei der Strukturplanung: ' + err.message, 'error');
+    btn.disabled = false;
+  }
+}
+
+function displayStructureResult(structure) {
+  const resultDiv = document.getElementById('structureResult');
+
+  try {
+    // Parse the JSON structure from Claude
+    const parsed = typeof structure === 'string' ? JSON.parse(structure) : structure;
+
+    let html = '';
+
+    if (parsed.recommendation) {
+      html += `<div class="structure-recommendation"><strong>Empfehlung:</strong> ${parsed.recommendation}</div>`;
+    }
+
+    if (parsed.chapters && Array.isArray(parsed.chapters)) {
+      parsed.chapters.forEach((ch, i) => {
+        html += `
+          <div class="structure-chapter">
+            <div class="structure-chapter-header">
+              <div class="chapter-number">${i + 1}</div>
+              <div>
+                <div class="structure-chapter-title">${ch.title || ''}</div>
+                ${ch.source ? `<div class="structure-chapter-source">Quellen: ${ch.source}</div>` : ''}
+              </div>
+            </div>
+            <div class="structure-chapter-desc">${ch.description || ''}</div>
+          </div>
+        `;
+      });
+
+      html += `
+        <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+          <button class="btn btn-primary" onclick="applyStructure()">Struktur übernehmen</button>
+          <button class="btn btn-secondary" onclick="skipStructure()">Ohne Änderung weiter</button>
+        </div>
+      `;
+    }
+
+    resultDiv.innerHTML = html;
+  } catch (e) {
+    // Fallback: show raw text
+    resultDiv.innerHTML = `<div class="structure-recommendation">${structure.replace(/\n/g, '<br>')}</div>
+      <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+        <button class="btn btn-primary" onclick="skipStructure()">Weiter zur Generierung</button>
+      </div>`;
+  }
+}
+
+function applyStructure() {
+  try {
+    const resultDiv = document.getElementById('structureResult');
+    const titles = resultDiv.querySelectorAll('.structure-chapter-title');
+    if (titles.length > 0 && titles.length <= chapters.length) {
+      titles.forEach((el, i) => {
+        if (i < chapters.length) {
+          chapters[i].title = el.textContent;
+        }
+      });
+      renderChapters();
+      showToast('Kapitelstruktur übernommen!', 'success');
+    }
+  } catch (e) {}
+  proceedToGeneration();
+}
+
+function skipStructure() {
+  proceedToGeneration();
+}
+
+function proceedToGeneration() {
+  document.getElementById('structureSection').style.display = 'none';
+  updateStepBar(4);
+  generateBook(storedApiKey);
 }
 
 // ── Password Modal ──
@@ -1175,6 +1540,7 @@ function showPasswordModal() {
 
 // ── API Key Modal ──
 function showApiKeyModal() {
+  const hasSaved = !!loadApiKey();
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
   overlay.innerHTML = `
@@ -1182,8 +1548,12 @@ function showApiKeyModal() {
       <h3>API-Konfiguration</h3>
       <label style="margin-top:0;">Anthropic API Key</label>
       <input type="password" id="modalApiKey" placeholder="sk-ant-..." value="${storedApiKey}" autocomplete="off" autofocus>
+      <div class="checkbox-row">
+        <input type="checkbox" id="rememberKey" ${hasSaved ? 'checked' : ''}>
+        <label for="rememberKey">API Key für diesen Browser merken</label>
+      </div>
       <div class="modal-actions">
-        <button class="btn btn-primary" id="apiConfirm">Generieren</button>
+        <button class="btn btn-primary" id="apiConfirm">Weiter</button>
         <button class="btn btn-secondary" id="apiCancel">Abbrechen</button>
       </div>
     </div>
@@ -1193,6 +1563,7 @@ function showApiKeyModal() {
   const apiInput = document.getElementById('modalApiKey');
   const confirmBtn = document.getElementById('apiConfirm');
   const cancelBtn = document.getElementById('apiCancel');
+  const rememberCb = document.getElementById('rememberKey');
 
   function closeModal() { overlay.remove(); }
 
@@ -1204,8 +1575,15 @@ function showApiKeyModal() {
       return;
     }
     storedApiKey = key;
+
+    if (rememberCb.checked) {
+      saveApiKey(key);
+    } else {
+      clearApiKey();
+    }
+
     closeModal();
-    generateBook(key);
+    showStructureStep();
   }
 
   confirmBtn.addEventListener('click', proceed);
@@ -1221,8 +1599,11 @@ function showApiKeyModal() {
 // ── Generate Book ──
 async function generateBook(apiKey) {
   const bookTitle = document.getElementById('bookTitle').value.trim();
+  const model = document.getElementById('aiModel').value;
+  const audience = document.getElementById('targetAudience').value;
+  const audienceLabel = { einsteiger: 'Einsteiger', fortgeschritten: 'Fortgeschrittene', experte: 'Experten' }[audience];
 
-  updateStepBar(3);
+  updateStepBar(4);
 
   const generateBtn = document.getElementById('generateBtn');
   const progressSection = document.getElementById('progressSection');
@@ -1248,6 +1629,8 @@ async function generateBook(apiKey) {
         signal: controller.signal,
         body: JSON.stringify({
           apiKey,
+          model,
+          audience: audienceLabel,
           transcript: chapters[i].transcript,
           chapterTitle: chapters[i].title,
           bookTitle: bookTitle || 'Ohne Titel',
@@ -1286,7 +1669,7 @@ async function generateBook(apiKey) {
 
   const successCount = chapters.filter(c => c.status === 'done').length;
   if (successCount > 0) {
-    updateStepBar(4);
+    updateStepBar(5);
     document.getElementById('downloadBtn').style.display = '';
     showToast(`${successCount} Kapitel erfolgreich generiert!`, 'success');
   }
@@ -1562,6 +1945,7 @@ function resetApp() {
   document.getElementById('downloadBtn').style.display = 'none';
   document.getElementById('resetBtn').style.display = 'none';
   document.getElementById('progressSection').style.display = 'none';
+  document.getElementById('structureSection').style.display = 'none';
   document.getElementById('progressBar').style.width = '0%';
   document.getElementById('progressText').textContent = 'Bereit';
 

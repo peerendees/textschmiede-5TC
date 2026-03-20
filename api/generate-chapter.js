@@ -28,16 +28,20 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { apiKey, transcript, chapterTitle, bookTitle, chapterNumber } =
+  const { apiKey, model, audience, transcript, chapterTitle, bookTitle, chapterNumber } =
     req.body;
 
   if (!apiKey || !transcript) {
     return res.status(400).json({ error: "apiKey and transcript are required" });
   }
 
+  const audienceHint = audience
+    ? `\n- Zielgruppe: ${audience} — passe Komplexität und Tiefe entsprechend an`
+    : '';
+
   const userPrompt = `## Buchkontext
 - Buchtitel: "${bookTitle || "Ohne Titel"}"
-- Kapitel ${chapterNumber || 1}: "${chapterTitle || "Ohne Titel"}"
+- Kapitel ${chapterNumber || 1}: "${chapterTitle || "Ohne Titel"}"${audienceHint}
 
 ## Transkript
 ${transcript}
@@ -46,11 +50,13 @@ ${transcript}
 
 Erstelle nun das vollständig ausgearbeitete Buchkapitel aus diesem Transkript. Halte dich strikt an alle Schreibregeln.`;
 
+  const selectedModel = model || "claude-sonnet-4-20250514";
+
   try {
     const client = new Anthropic({ apiKey });
 
     const message = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: selectedModel,
       max_tokens: 16000,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userPrompt }],
