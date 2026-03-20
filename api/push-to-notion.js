@@ -31,20 +31,36 @@ export default async function handler(req, res) {
     };
   }
 
-  // Add Source if provided
-  if (source) {
-    properties.Quelle = {
-      rich_text: [{ text: { content: source } }]
-    };
-  }
-
   // Add Datum (today)
   properties.Datum = {
     date: { start: new Date().toISOString().split('T')[0] }
   };
 
+  // Add Source as URL if provided (uses URL property in Notion DB)
+  if (source) {
+    // Note: "Quelle" property does not exist in the DB schema.
+    // Source info is prepended to the page content instead.
+  }
+
   // Convert markdown content to Notion blocks
-  const blocks = markdownToNotionBlocks(content);
+  const blocks = [];
+
+  // Prepend source info as callout block if provided
+  if (source) {
+    blocks.push({
+      object: 'block',
+      type: 'callout',
+      callout: {
+        icon: { type: 'emoji', emoji: '📄' },
+        rich_text: [
+          { type: 'text', text: { content: 'Quelle: ' }, annotations: { bold: true } },
+          { type: 'text', text: { content: source } }
+        ]
+      }
+    });
+  }
+
+  blocks.push(...markdownToNotionBlocks(content));
 
   try {
     // Create page in Notion
