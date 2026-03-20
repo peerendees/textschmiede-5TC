@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TEXTSCHMIEDE</title>
+  <title>Textschmiede</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -114,12 +114,12 @@
     }
 
     header h1 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.8rem;
-      font-weight: 400;
+      font-family: 'Lora', serif;
+      font-size: 1.6rem;
+      font-weight: 600;
       color: var(--text);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      text-transform: none;
       user-select: none;
     }
 
@@ -550,11 +550,11 @@
       border-radius: 10px;
       background: var(--bg2);
       color: var(--text-muted);
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1rem;
-      font-weight: 400;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      font-family: 'Lora', serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0.02em;
       cursor: pointer;
       transition: all 0.3s;
       text-align: center;
@@ -1451,9 +1451,8 @@
 
   <!-- Mode Toggle -->
   <div class="mode-toggle">
-    <button class="mode-btn active" id="modeBook" onclick="setMode('book')">Buchkapitel</button>
-    <button class="mode-btn" id="modeSOP" onclick="setMode('sop')">SOP-Generator</button>
-    <button class="config-btn" id="sopConfigBtn" onclick="showDbConfigModal()" title="Notion DB konfigurieren" style="display:none;">&#9881;</button>
+    <button class="mode-btn active" id="modeBook" onclick="setMode('book')">Text schmieden</button>
+    <button class="mode-btn" id="modeSOP" onclick="setMode('sop')">SOP generieren</button>
   </div>
 
   <!-- Book Meta -->
@@ -1585,7 +1584,7 @@
 
   <!-- SOP Settings (hidden by default) -->
   <div class="section" id="sopSettingsSection" style="display:none;">
-    <div class="section-title">SOP-Einstellungen</div>
+    <div class="section-title">SOP-Einstellungen <button class="config-btn" id="sopConfigBtn" onclick="showDbConfigModal()" title="Content-Profile verwalten" style="font-size: 1.1rem; margin-left: auto;">&#9881;</button></div>
     <label for="sopTitle">SOP-Titel</label>
     <input type="text" id="sopTitle" placeholder="z.B. Neuen Mitarbeiter onboarden">
     <div class="row">
@@ -2789,7 +2788,7 @@ const DEFAULT_PROFILES = {
       status: {
         label: 'Status',
         type: 'status',
-        options: ['Not started', 'In Review', 'Active', 'Deprecated']
+        options: ['Neu', 'In Prüfung', 'Aktiv', 'Veraltet']
       }
     }
   }
@@ -3094,7 +3093,7 @@ function showNewProfileForm() {
         </div>
         <div>
           <label>Status-Optionen (kommagetrennt)</label>
-          <input type="text" id="newProfileStatus" value="Not started, In Review, Active, Deprecated">
+          <input type="text" id="newProfileStatus" value="Neu, In Prüfung, Aktiv, Veraltet">
         </div>
       </div>
       <div class="modal-actions" style="margin-top: 1rem;">
@@ -3203,7 +3202,7 @@ function setMode(mode) {
     document.getElementById('downloadBtn').style.display = chapters.some(c => c.status === 'done') ? '' : 'none';
     document.getElementById('stepBar').style.display = '';
     document.getElementById('sopStepBar').style.display = 'none';
-    document.getElementById('sopConfigBtn').style.display = 'none';
+    // sopConfigBtn is now inside sopSettingsSection, auto-hidden
   } else {
     bookSections.forEach(id => document.getElementById(id).style.display = 'none');
     sopSections.forEach(id => document.getElementById(id).style.display = '');
@@ -3213,7 +3212,7 @@ function setMode(mode) {
     document.getElementById('generateBtn').disabled = false;
     document.getElementById('stepBar').style.display = 'none';
     document.getElementById('sopStepBar').style.display = '';
-    document.getElementById('sopConfigBtn').style.display = '';
+    // sopConfigBtn is now inside sopSettingsSection, auto-shown
     updateSopStepBar(sopCurrentStep);
     if (sopGeneratedContent) {
       document.getElementById('sopResultSection').style.display = '';
