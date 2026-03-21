@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { callProvider } from "./lib/providers.js";
 
 // Template-specific prompt variations
 const TEMPLATE_CONFIGS = {
@@ -75,7 +75,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { apiKey, model, audience, template, tone, detail, transcript, chapterTitle, bookTitle, chapterNumber } =
+  const { apiKey, provider, model, audience, template, tone, detail, transcript, chapterTitle, bookTitle, chapterNumber } =
     req.body;
 
   if (!apiKey || !transcript) {
@@ -97,30 +97,22 @@ ${transcript}
 
 Erstelle nun das vollständig ausgearbeitete Buchkapitel aus diesem Transkript. Halte dich strikt an alle Schreibregeln.`;
 
-  const selectedModel = model || "claude-sonnet-4-20250514";
   const systemPrompt = buildSystemPrompt(template || 'buch', tone || 'professionell', detail || 'standard');
 
   try {
-    const client = new Anthropic({ apiKey });
-
-    const message = await client.messages.create({
-      model: selectedModel,
-      max_tokens: 16000,
-      system: systemPrompt,
-      messages: [{ role: "user", content: userPrompt }],
+    const { content } = await callProvider({
+      provider: provider || 'anthropic',
+      apiKey,
+      model: model || 'claude-sonnet-4-20250514',
+      systemPrompt,
+      userPrompt,
+      maxTokens: 16000
     });
-
-    const content = message.content
-      .filter((block) => block.type === "text")
-      .map((block) => block.text)
-      .join("\n");
 
     return res.status(200).json({ content });
   } catch (error) {
-    console.error("Claude API error:", error);
+    console.error("API error:", error);
     const status = error.status || 500;
-    const errorMessage =
-      error.message || "Fehler bei der Kapitelgenerierung";
-    return res.status(status).json({ error: errorMessage });
+    return res.status(status).json({ error: error.message || "Fehler bei der Kapitelgenerierung" });
   }
 }

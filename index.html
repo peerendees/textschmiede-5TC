@@ -1487,8 +1487,18 @@
       <div>
         <label for="aiModel">KI-Modell</label>
         <select id="aiModel">
-          <option value="claude-sonnet-4-20250514">Claude Sonnet 4 — Schnell, 1-2 Min/Kapitel</option>
-          <option value="claude-opus-4-20250514">Claude Opus 4 — Beste Qualität, 3-5 Min/Kapitel</option>
+          <optgroup label="Claude (Anthropic)">
+            <option value="anthropic:claude-sonnet-4-20250514">Claude Sonnet 4 — Schnell</option>
+            <option value="anthropic:claude-opus-4-20250514">Claude Opus 4 — Beste Qualität</option>
+          </optgroup>
+          <optgroup label="Gemini (Google)">
+            <option value="google:gemini-2.5-flash">Gemini 2.5 Flash — Schnell</option>
+            <option value="google:gemini-2.5-pro">Gemini 2.5 Pro — Beste Qualität</option>
+          </optgroup>
+          <optgroup label="Grok (xAI)">
+            <option value="xai:grok-3-mini">Grok 3 Mini — Schnell</option>
+            <option value="xai:grok-3">Grok 3 — Beste Qualität</option>
+          </optgroup>
         </select>
       </div>
     </div>
@@ -1604,8 +1614,18 @@
       <div>
         <label for="sopModel">KI-Modell</label>
         <select id="sopModel">
-          <option value="claude-sonnet-4-20250514">Claude Sonnet 4 — Schnell</option>
-          <option value="claude-opus-4-20250514">Claude Opus 4 — Beste Qualität</option>
+          <optgroup label="Claude (Anthropic)">
+            <option value="anthropic:claude-sonnet-4-20250514">Claude Sonnet 4 — Schnell</option>
+            <option value="anthropic:claude-opus-4-20250514">Claude Opus 4 — Beste Qualität</option>
+          </optgroup>
+          <optgroup label="Gemini (Google)">
+            <option value="google:gemini-2.5-flash">Gemini 2.5 Flash — Schnell</option>
+            <option value="google:gemini-2.5-pro">Gemini 2.5 Pro — Beste Qualität</option>
+          </optgroup>
+          <optgroup label="Grok (xAI)">
+            <option value="xai:grok-3-mini">Grok 3 Mini — Schnell</option>
+            <option value="xai:grok-3">Grok 3 — Beste Qualität</option>
+          </optgroup>
         </select>
       </div>
     </div>
@@ -1700,30 +1720,69 @@ let draggedIndex = null;
 let currentStep = 1;
 let passwordRequired = true;
 let inactivityTimer = null;
-let storedApiKey = loadApiKey();
 const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 const TOTAL_STEPS = 5;
 
-// ── API Key Storage ──
-function saveApiKey(key) {
+// ── Provider Config ──
+const PROVIDER_CONFIG = {
+  anthropic: { label: 'Anthropic API Key', placeholder: 'sk-ant-...', name: 'Claude' },
+  google: { label: 'Google AI API Key', placeholder: 'AI...', name: 'Gemini' },
+  xai: { label: 'xAI API Key', placeholder: 'xai-...', name: 'Grok' }
+};
+
+// ── API Key Storage (per Provider) ──
+function saveProviderKey(provider, key) {
   try {
-    // Simple obfuscation (not encryption — localStorage is domain-scoped)
     const encoded = btoa(unescape(encodeURIComponent(key)));
-    localStorage.setItem('ts5tc_ak', encoded);
-  } catch (e) { /* silent fail if localStorage unavailable */ }
+    localStorage.setItem('ts5tc_ak_' + provider, encoded);
+  } catch (e) {}
 }
 
-function loadApiKey() {
+function loadProviderKey(provider) {
   try {
-    const encoded = localStorage.getItem('ts5tc_ak');
+    const encoded = localStorage.getItem('ts5tc_ak_' + provider);
     if (!encoded) return '';
     return decodeURIComponent(escape(atob(encoded)));
   } catch (e) { return ''; }
 }
 
-function clearApiKey() {
-  try { localStorage.removeItem('ts5tc_ak'); } catch (e) {}
+function clearProviderKey(provider) {
+  try { localStorage.removeItem('ts5tc_ak_' + provider); } catch (e) {}
 }
+
+// Migration: move old single key to anthropic
+(function migrateOldApiKey() {
+  try {
+    const oldKey = localStorage.getItem('ts5tc_ak');
+    if (oldKey && !localStorage.getItem('ts5tc_ak_anthropic')) {
+      localStorage.setItem('ts5tc_ak_anthropic', oldKey);
+    }
+    localStorage.removeItem('ts5tc_ak');
+  } catch (e) {}
+})();
+
+let providerKeys = {
+  anthropic: loadProviderKey('anthropic'),
+  google: loadProviderKey('google'),
+  xai: loadProviderKey('xai')
+};
+
+// Helper: parse "provider:model" from select value
+function getSelectedModel(selectId) {
+  const val = document.getElementById(selectId).value;
+  const colonIdx = val.indexOf(':');
+  return {
+    provider: val.substring(0, colonIdx),
+    model: val.substring(colonIdx + 1)
+  };
+}
+
+function getProviderApiKey(provider) {
+  return providerKeys[provider] || loadProviderKey(provider);
+}
+
+// Legacy compatibility
+let storedApiKey = providerKeys.anthropic;
 
 // ── Helpers ──
 function formatFileSize(bytes) {
@@ -2013,7 +2072,9 @@ function renderChapterPreview(md) {
 
 // ── Einzelkapitel neu generieren ──
 async function regenerateChapter(index) {
-  if (!storedApiKey) {
+  const { provider, model } = getSelectedModel('aiModel');
+  const currentKey = getProviderApiKey(provider);
+  if (!currentKey) {
     showToast('Kein API-Key vorhanden. Bitte zuerst generieren.', 'error');
     return;
   }
@@ -2022,7 +2083,6 @@ async function regenerateChapter(index) {
   if (!ch) return;
 
   const bookTitle = document.getElementById('bookTitle').value.trim();
-  const model = document.getElementById('aiModel').value;
   const audience = document.getElementById('targetAudience').value;
   const template = document.getElementById('outputTemplate').value;
   const tone = document.getElementById('toneSetting').value;
@@ -2042,7 +2102,8 @@ async function regenerateChapter(index) {
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
       body: JSON.stringify({
-        apiKey: storedApiKey,
+        apiKey: currentKey,
+        provider,
         model,
         audience: audienceLabel,
         template,
@@ -2174,9 +2235,13 @@ async function planStructure() {
   btn.disabled = true;
 
   const resultDiv = document.getElementById('structureResult');
+  const { provider: structProvider, model: structModel } = getSelectedModel('aiModel');
+  const structKey = getProviderApiKey(structProvider);
+  const providerName = PROVIDER_CONFIG[structProvider]?.name || 'KI';
+
   resultDiv.innerHTML = `
     <div class="structure-loading">
-      <p>Claude liest die Transkripte und plant die Buchstruktur...</p>
+      <p>${providerName} liest die Transkripte und plant die Buchstruktur...</p>
       <div class="structure-spinner"></div>
     </div>
   `;
@@ -2194,8 +2259,9 @@ async function planStructure() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        apiKey: storedApiKey,
-        model: document.getElementById('aiModel').value,
+        apiKey: structKey,
+        provider: structProvider,
+        model: structModel,
         summaries,
         bookTitle: document.getElementById('bookTitle').value.trim() || 'Ohne Titel',
         audience: audienceLabel,
@@ -2289,7 +2355,8 @@ function skipStructure() {
 function proceedToGeneration() {
   document.getElementById('structureSection').style.display = 'none';
   updateStepBar(4);
-  generateBook(storedApiKey);
+  const { provider } = getSelectedModel('aiModel');
+  generateBook(getProviderApiKey(provider));
 }
 
 // ── Password Modal ──
@@ -2347,19 +2414,24 @@ function showPasswordModal() {
   setTimeout(() => pwInput.focus(), 50);
 }
 
-// ── API Key Modal ──
+// ── API Key Modal (provider-aware) ──
 function showApiKeyModal() {
-  const hasSaved = !!loadApiKey();
+  const selectId = currentMode === 'sop' ? 'sopModel' : 'aiModel';
+  const { provider } = getSelectedModel(selectId);
+  const config = PROVIDER_CONFIG[provider] || PROVIDER_CONFIG.anthropic;
+  const savedKey = getProviderApiKey(provider);
+  const hasSaved = !!savedKey;
+
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
   overlay.innerHTML = `
     <div class="modal">
-      <h3>API-Konfiguration</h3>
-      <label style="margin-top:0;">Anthropic API Key</label>
-      <input type="password" id="modalApiKey" placeholder="sk-ant-..." value="${storedApiKey}" autocomplete="off" autofocus>
+      <h3>API-Konfiguration — ${config.name}</h3>
+      <label style="margin-top:0;">${config.label}</label>
+      <input type="password" id="modalApiKey" placeholder="${config.placeholder}" value="${savedKey}" autocomplete="off" autofocus>
       <div class="checkbox-row">
         <input type="checkbox" id="rememberKey" ${hasSaved ? 'checked' : ''}>
-        <label for="rememberKey">API Key für diesen Browser merken</label>
+        <label for="rememberKey">Key für diesen Browser merken</label>
       </div>
       <div class="modal-actions">
         <button class="btn btn-primary" id="apiConfirm">Weiter</button>
@@ -2383,12 +2455,13 @@ function showApiKeyModal() {
       apiInput.focus();
       return;
     }
-    storedApiKey = key;
+    providerKeys[provider] = key;
+    storedApiKey = key; // legacy compat
 
     if (rememberCb.checked) {
-      saveApiKey(key);
+      saveProviderKey(provider, key);
     } else {
-      clearApiKey();
+      clearProviderKey(provider);
     }
 
     closeModal();
@@ -2412,7 +2485,8 @@ function showApiKeyModal() {
 // ── Generate Book ──
 async function generateBook(apiKey) {
   const bookTitle = document.getElementById('bookTitle').value.trim();
-  const model = document.getElementById('aiModel').value;
+  const { provider, model } = getSelectedModel('aiModel');
+  const bookApiKey = apiKey || getProviderApiKey(provider);
   const audience = document.getElementById('targetAudience').value;
   const template = document.getElementById('outputTemplate').value;
   const tone = document.getElementById('toneSetting').value;
@@ -2444,7 +2518,8 @@ async function generateBook(apiKey) {
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
         body: JSON.stringify({
-          apiKey,
+          apiKey: bookApiKey,
+          provider,
           model,
           audience: audienceLabel,
           template,
@@ -3310,7 +3385,8 @@ async function generateSop() {
 
   const sopTitle = document.getElementById('sopTitle').value.trim() || 'Ohne Titel';
   const audience = document.getElementById('sopAudience').value;
-  const model = document.getElementById('sopModel').value;
+  const { provider: sopProvider, model: sopModel } = getSelectedModel('sopModel');
+  const sopApiKey = getProviderApiKey(sopProvider);
   const audienceLabel = { einsteiger: 'Einsteiger', fortgeschritten: 'Fortgeschrittene', experte: 'Experten' }[audience];
 
   const generateBtn = document.getElementById('generateBtn');
@@ -3323,8 +3399,9 @@ async function generateSop() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        apiKey: storedApiKey,
-        model,
+        apiKey: sopApiKey,
+        provider: sopProvider,
+        model: sopModel,
         transcript,
         sopTitle,
         audience: audienceLabel
@@ -3363,8 +3440,9 @@ async function generateSop() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          apiKey: storedApiKey,
-          model,
+          apiKey: sopApiKey,
+          provider: sopProvider,
+          model: sopModel,
           sopContent: sopGeneratedContent,
           sopTitle,
           availableTags: activeProfile.properties.tags.options,

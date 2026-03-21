@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { callProvider } from "./lib/providers.js";
 
 const SYSTEM_PROMPT = `Du bist ein Experte für Prozessdokumentation und Standard Operating Procedures (SOPs). Deine Aufgabe ist es, aus einem gesprochenen Transkript oder einer Prozessbeschreibung eine professionelle, strukturierte SOP zu erstellen.
 
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { apiKey, model, transcript, sopTitle, audience } = req.body;
+  const { apiKey, provider, model, transcript, sopTitle, audience } = req.body;
 
   if (!apiKey || !transcript) {
     return res.status(400).json({ error: "apiKey and transcript are required" });
@@ -55,28 +55,20 @@ ${transcript}
 
 Erstelle nun die vollständige SOP aus diesem Transkript. Halte dich strikt an die Struktur und alle Schreibregeln.`;
 
-  const selectedModel = model || "claude-sonnet-4-20250514";
-
   try {
-    const client = new Anthropic({ apiKey });
-
-    const message = await client.messages.create({
-      model: selectedModel,
-      max_tokens: 8000,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userPrompt }],
+    const { content } = await callProvider({
+      provider: provider || 'anthropic',
+      apiKey,
+      model: model || 'claude-sonnet-4-20250514',
+      systemPrompt: SYSTEM_PROMPT,
+      userPrompt,
+      maxTokens: 8000
     });
-
-    const content = message.content
-      .filter((block) => block.type === "text")
-      .map((block) => block.text)
-      .join("\n");
 
     return res.status(200).json({ content });
   } catch (error) {
-    console.error("Claude API error:", error);
+    console.error("API error:", error);
     const status = error.status || 500;
-    const errorMessage = error.message || "Fehler bei der SOP-Generierung";
-    return res.status(status).json({ error: errorMessage });
+    return res.status(status).json({ error: error.message || "Fehler bei der SOP-Generierung" });
   }
 }

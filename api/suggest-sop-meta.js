@@ -1,11 +1,11 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { callProvider } from "./lib/providers.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { apiKey, model, sopContent, sopTitle, availableTags, availableRelevance } = req.body;
+  const { apiKey, provider, model, sopContent, sopTitle, availableTags, availableRelevance } = req.body;
 
   if (!apiKey || !sopContent) {
     return res.status(400).json({ error: "apiKey and sopContent are required" });
@@ -37,15 +37,15 @@ Verfügbare Relevanz-Rollen: ${availableRelevance.join(', ')}
 Schlage passende Tags und Relevanz vor.`;
 
   try {
-    const client = new Anthropic({ apiKey });
-    const message = await client.messages.create({
-      model: model || "claude-sonnet-4-20250514",
-      max_tokens: 500,
-      system: systemPrompt,
-      messages: [{ role: "user", content: userPrompt }],
+    const { content: text } = await callProvider({
+      provider: provider || 'anthropic',
+      apiKey,
+      model: model || 'claude-sonnet-4-20250514',
+      systemPrompt,
+      userPrompt,
+      maxTokens: 500,
+      jsonMode: (provider === 'google' || provider === 'xai')
     });
-
-    const text = message.content.filter(b => b.type === "text").map(b => b.text).join("");
 
     try {
       const suggestions = JSON.parse(text);
