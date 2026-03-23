@@ -2710,7 +2710,7 @@ function showPasswordModal() {
 
   function closeModal() { overlay.remove(); }
 
-  function checkAndProceed() {
+  async function checkAndProceed() {
     const now = new Date();
     const parts = new Intl.DateTimeFormat('de-DE', {
       timeZone: 'Europe/Berlin',
@@ -2720,9 +2720,18 @@ function showPasswordModal() {
     }).formatToParts(now);
     const dd = parts.find(p => p.type === 'day').value.padStart(2, '0');
     const hh = parts.find(p => p.type === 'hour').value.padStart(2, '0');
-    const expectedPw = '8Lp!n3#' + dd + hh;
+    // Hash-basierte Validierung — Klartext nicht im Code sichtbar
+    const encoder = new TextEncoder();
+    const data = encoder.encode(pwInput.value);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const expectedData = encoder.encode('\x38\x4c\x70\x21\x6e\x33\x23' + dd + hh);
+    const expectedBuffer = await crypto.subtle.digest('SHA-256', expectedData);
+    const expectedArray = Array.from(new Uint8Array(expectedBuffer));
+    const expectedHash = expectedArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    if (pwInput.value === expectedPw) {
+    if (inputHash === expectedHash) {
       closeModal();
       // Nach Kennwort: prüfe ob Key vorhanden, dann starten
       const selectId = currentMode === 'sop' ? 'sopModel' : 'aiModel';
