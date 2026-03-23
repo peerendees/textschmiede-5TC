@@ -1647,7 +1647,7 @@
             <option value="anthropic:claude-opus-4-20250514">Claude Opus 4 — Beste Qualität</option>
           </optgroup>
           <optgroup label="Gemini (Google)">
-            <option value="google-free:gemini-2.5-flash">✦ Gemini Flash — Kostenlos</option>
+            <option value="google-free:gemini-2.5-flash">Gemini Flash — Kostenlos</option>
             <option value="google:gemini-2.5-flash">Gemini 2.5 Flash — Schnell</option>
             <option value="google:gemini-2.5-pro">Gemini 2.5 Pro — Beste Qualität</option>
           </optgroup>
@@ -1794,7 +1794,7 @@
             <option value="anthropic:claude-opus-4-20250514">Claude Opus 4 — Beste Qualität</option>
           </optgroup>
           <optgroup label="Gemini (Google)">
-            <option value="google-free:gemini-2.5-flash">✦ Gemini Flash — Kostenlos</option>
+            <option value="google-free:gemini-2.5-flash">Gemini Flash — Kostenlos</option>
             <option value="google:gemini-2.5-flash">Gemini 2.5 Flash — Schnell</option>
             <option value="google:gemini-2.5-pro">Gemini 2.5 Pro — Beste Qualität</option>
           </optgroup>
@@ -1985,7 +1985,7 @@ function onModelChange(selectId) {
 
   // Free tier — kein Key nötig
   if (config.isFree) {
-    container.innerHTML = '<div class="key-status">✦ Kein API-Key nötig — kostenloser Zugang</div>';
+    container.innerHTML = '<div class="key-status">Kein API-Key nötig — kostenloser Zugang</div>';
     container.classList.add('visible');
     return;
   }
@@ -1996,7 +1996,7 @@ function onModelChange(selectId) {
     const masked = savedKey.substring(0, 8) + '···';
     container.innerHTML = `
       <div class="key-status">
-        ✓ ${config.name}-Key gespeichert (${masked})
+        ${config.name}-Key gespeichert (${masked})
         <span class="key-delete" onclick="deleteInlineKey('${provider}', '${selectId}')" title="Key entfernen">×</span>
       </div>`;
     container.classList.add('visible');
@@ -2028,7 +2028,7 @@ function saveInlineKey(provider, selectId) {
   }
   providerKeys[provider] = key;
   saveProviderKey(provider, key);
-  showToast(PROVIDER_CONFIG[provider].name + '-Key gespeichert ✓', 'success');
+  showToast(PROVIDER_CONFIG[provider].name + '-Key gespeichert.', 'success');
   onModelChange(selectId);
 }
 
@@ -2049,13 +2049,13 @@ function updateModelDropdownStatus(selectId) {
     const prov = opt.value.substring(0, colonIdx);
     const conf = PROVIDER_CONFIG[prov];
     // Originaltext ohne Prefix wiederherstellen
-    let text = opt.textContent.replace(/^[✓🔑✦]\s*/, '');
+    let text = opt.textContent.replace(/^[\u2713\u2726\u00BB\u203A]\s*|^—\s*/u, '');
     if (conf && conf.isFree) {
-      opt.textContent = '✦ ' + text;
+      // Kostenlos — kein zusätzliches Symbol, steht schon im Text
     } else if (getProviderApiKey(prov)) {
-      opt.textContent = '✓ ' + text;
+      opt.textContent = '› ' + text;
     } else {
-      opt.textContent = '🔑 ' + text;
+      opt.textContent = '— ' + text;
     }
   });
 }
